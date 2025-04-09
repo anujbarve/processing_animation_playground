@@ -1,5 +1,3 @@
-
-// Entity.pde
 class Entity {
     float x, y, targetX, targetY, startX, startY;
     float moveProgress;
@@ -47,6 +45,7 @@ class Entity {
     }
     
     void drawConnection(Entity connected) {
+        ColorScheme theme = app.getThemeManager().getCurrentTheme();
         float dx = connected.x - x;
         float dy = connected.y - y;
         float distance = dist(x, y, connected.x, connected.y);
@@ -63,7 +62,7 @@ class Entity {
         float y2 = connected.y - ny * toRadius;
         
         // Base connection line
-        stroke(Constants.CONNECTION_COLOR);
+        stroke(theme.connectionColor);
         strokeWeight(2);
         line(x1, y1, x2, y2);
         
@@ -72,11 +71,12 @@ class Entity {
     }
     
     void drawFlowingLine(float x1, float y1, float x2, float y2, float length) {
+        ColorScheme theme = app.getThemeManager().getCurrentTheme();
         float dashLength = 10;
         float gapLength = 15;
         float totalLength = dashLength + gapLength;
         
-        stroke(Constants.FLOW_COLOR);
+        stroke(theme.flowColor);
         strokeWeight(2);
         
         int dashCount = ceil(length / totalLength);
@@ -98,24 +98,42 @@ class Entity {
     }
     
     void showEntities() {
+        ColorScheme theme = app.getThemeManager().getCurrentTheme();
         stroke(1);
+        
+        // Set fill color based on entity type
         if (type == Constants.TYPE_NODE) {
-            fill(Constants.NODE_COLOR);
+            fill(theme.nodeColor);
             circle(x, y, size);
         } else {
-            fill(Constants.NODE_COLOR);
+            fill(theme.dataNodeColor);
             rectMode(CENTER);
             square(x, y, size);
         }
         
+        // Draw selection indicator if selected
+        if (isSelected) {
+            noFill();
+            stroke(theme.highlightColor);
+            strokeWeight(2);
+            if (type == Constants.TYPE_NODE) {
+                circle(x, y, size + 10);
+            } else {
+                rectMode(CENTER);
+                square(x, y, size + 10);
+            }
+        }
+        
+        // Draw entity text
         if (data != null && !data.isEmpty()) {
-            fill(0);
+            fill(theme.textColorEntity);
             textAlign(CENTER, CENTER);
             textSize(22);
             text(data, x, y);
         }
     }
     
+    // Rest of the methods remain the same...
     boolean isMouseOver(float mx, float my) {
         if (type == Constants.TYPE_NODE) {
             return dist(mx, my, x, y) < size / 2;

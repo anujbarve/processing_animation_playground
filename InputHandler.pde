@@ -2,6 +2,12 @@ class InputHandler {
   private Application app;
   private int gridSize;
 
+
+  private static final int THEME_PANEL_X = 10;
+  private static final int THEME_PANEL_Y = 10;
+  private static final int THEME_PANEL_WIDTH = 200;
+  private static final int THEME_PANEL_HEIGHT = 30;
+
   InputHandler(Application app) {
     this.app = app;
     this.gridSize = Constants.GRID_SIZE;
@@ -34,7 +40,11 @@ class InputHandler {
       break;
 
     case CODED:
-      handleArrowKeys(keyCode, selectedEntity);
+      if (event.isShiftDown()) {
+        handleThemeShortcuts(keyCode);
+      } else {
+        handleArrowKeys(keyCode, selectedEntity);
+      }
       break;
 
     case 'm':
@@ -49,8 +59,8 @@ class InputHandler {
       handleCreateDataEntity();
       break;
 
-    case 'q':
-      handleStartMatrixAnimation();
+    case 'a':
+      handleAnimation();
       break;
 
     case 't':
@@ -89,15 +99,49 @@ class InputHandler {
       handleAnimationSpeed(2.0f);
       break;
 
+    case 'h':  // Theme controls
+      showThemeControls();
+      break;
+
     default:
       handleNumberKeys(key, entityManager);
       break;
     }
   }
 
+
+  private void handleThemeShortcuts(int keyCode) {
+    if (keyCode >= 49 && keyCode <= 53) {  // 1-5 keys
+      int themeType = keyCode - 49;  // Convert to 0-4
+      app.getThemeManager().setTheme(themeType);
+      app.getStepLogger().addStep("Switched to " + Constants.THEME_NAMES[themeType] + " theme");
+    }
+  }
+
+  private void showThemeControls() {
+    app.getStepLogger().addStep("Theme Controls:");
+    app.getStepLogger().addStep("Shift + 1-5: Switch themes");
+    app.getStepLogger().addStep("Click theme panel to cycle");
+  }
+
+  private void cycleTheme() {
+    ThemeManager tm = app.getThemeManager();
+    int nextTheme = (tm.getCurrentThemeType() + 1) % Constants.THEME_NAMES.length;
+    tm.setTheme(nextTheme);
+    app.getStepLogger().addStep("Switched to " + Constants.THEME_NAMES[nextTheme] + " theme");
+  }
+
   void handleMousePressed(int mx, int my) {
     EntityManager entityManager = app.getEntityManager();
     Entity clickedEntity = entityManager.getEntityAtPosition(mx, my);
+
+
+    if (mx >= THEME_PANEL_X && mx <= THEME_PANEL_X + THEME_PANEL_WIDTH &&
+      my >= THEME_PANEL_Y && my <= THEME_PANEL_Y + THEME_PANEL_HEIGHT) {
+      cycleTheme();
+      return;
+    }
+
 
     if (clickedEntity != null) {
       entityManager.setSelectedEntity(clickedEntity);
@@ -238,7 +282,7 @@ class InputHandler {
     int snappedX = (int) (Math.round((float) mouseX / gridSize) * gridSize);
     int snappedY = (int) (Math.round((float) mouseY / gridSize) * gridSize);
 
-    String nodeName = "Node" + (entityManager.getNextEntityIndex() + 1); // Add 1 for display purposes
+    String nodeName = "Node" + (entityManager.getNextEntityIndex()); // Add 1 for display purposes
     Entity newNode = entityManager.createEntity(snappedX, snappedY, Constants.TYPE_NODE, nodeName);
 
     if (newNode != null) {
@@ -265,15 +309,7 @@ class InputHandler {
       new CreateOperation(newData, entityIndex, entityManager));
   }
 
-  private void handleStartMatrixAnimation() {
-    // Clear existing entities and state
-    app.resetSimulation();
 
-    // Create and start the new animation
-    AnimationSequence sequence = createMatrixAnimation();
-    app.getAnimationSystem().addSequence(sequence);
-    app.getStepLogger().addStep("Started matrix animation");
-  }
 
   private void handleToggleType(Entity entity) {
     if (entity == null) return;
@@ -356,31 +392,68 @@ class InputHandler {
     }
   }
 
-  private AnimationSequence createMatrixAnimation() {
+  private void handleAnimation() {
+    // Clear existing entities and state
+    app.resetSimulation();
+
+    // Create and start the new animation
+    AnimationSequence sequence = createAnimation();
+    app.getAnimationSystem().addSequence(sequence);
+    app.getStepLogger().addStep("Started matrix animation");
+  }
+
+  private AnimationSequence createAnimation() {
     AnimationSequence sequence = new AnimationSequence();
     EntityManager entityManager = app.getEntityManager();
 
     // Create initial entities and add them to the EntityManager
-    Entity e1 = entityManager.createEntity(200, 200, Constants.TYPE_NODE, "1");
-    Entity e2 = entityManager.createEntity(200, 300, Constants.TYPE_NODE, "2");
-    Entity e3 = entityManager.createEntity(300, 200, Constants.TYPE_NODE, "3");
-    Entity e4 = entityManager.createEntity(300, 300, Constants.TYPE_NODE, "4");
+    Entity e1 = entityManager.createEntity(200, 200, Constants.TYPE_DATA, "M0");
+    Entity e2 = entityManager.createEntity(200, 200, Constants.TYPE_DATA, "M0");
+    Entity e3 = entityManager.createEntity(200, 200, Constants.TYPE_DATA, "M0");
+    Entity e4 = entityManager.createEntity(200, 200, Constants.TYPE_DATA, "M1");
+    Entity e5 = entityManager.createEntity(200, 200, Constants.TYPE_DATA, "5");
+    Entity e6 = entityManager.createEntity(200, 200, Constants.TYPE_DATA, "6");
+    Entity e7 = entityManager.createEntity(200, 200, Constants.TYPE_DATA, "7");
+    Entity e8 = entityManager.createEntity(200, 200, Constants.TYPE_DATA, "8");
+
+    Entity d1 = entityManager.createEntity(200, 200, Constants.TYPE_DATA, "m");
 
     // Add a small delay before starting movement
     sequence.addStep(new DelayStep(500));
 
     // Add movement steps
-    sequence.addStep(new MoveStep(e1, 200, 600, 1000));
-    sequence.addStep(new DelayStep(200));  // Add small delay between movements
+    sequence.addStep(new MoveStep(e1, 400, 300, 1000));
 
-    sequence.addStep(new MoveStep(e2, 200, 700, 1000));
-    sequence.addStep(new DelayStep(200));
+    sequence.addStep(new MoveStep(e2, 650, 300, 1000));
 
-    sequence.addStep(new MoveStep(e3, 300, 600, 1000));
-    sequence.addStep(new DelayStep(200));
+    sequence.addStep(new MoveStep(e3, 900, 300, 1000));
 
-    sequence.addStep(new MoveStep(e4, 300, 700, 1000));
-    sequence.addStep(new DelayStep(200));
+    sequence.addStep(new MoveStep(e4, 1150, 300, 1000));
+
+    sequence.addStep(new MoveStep(e5, 400, 650, 1000));
+
+    sequence.addStep(new MoveStep(e6, 650, 650, 1000));
+
+    sequence.addStep(new MoveStep(e7, 900, 650, 1000));
+
+    sequence.addStep(new MoveStep(e8, 1150, 650, 1000));
+
+
+    sequence.addStep(new ConnectStep(e1, e2, 1000));
+    sequence.addStep(new ConnectStep(e2, e3, 1000));
+    sequence.addStep(new ConnectStep(e3, e4, 1000));
+    sequence.addStep(new ConnectStep(e4, e5, 1000));
+    sequence.addStep(new ConnectStep(e5, e6, 1000));
+    sequence.addStep(new ConnectStep(e6, e7, 1000));
+    sequence.addStep(new ConnectStep(e7, e8, 1000));
+    sequence.addStep(new ConnectStep(e8, e1, 1000));
+
+
+    sequence.addStep(new MoveStep(d1, 1150, 650, 200));
+
+
+
+
 
     app.getStepLogger().addStep("Created matrix animation");
     return sequence;

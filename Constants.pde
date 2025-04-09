@@ -7,9 +7,46 @@ static class Constants {
     static final int TYPE_NODE = 0;
     static final int TYPE_DATA = 1;
     
-    // Define colors as integers instead of using color()
-    static final int GRID_COLOR = 0xFF282828;    // RGB(40, 40, 40)
-    static final int NODE_COLOR = 0xFFFFFFFF;    // RGB(255, 255, 255)
-    static final int CONNECTION_COLOR = 0x64323232;  // RGBA(50, 50, 50, 100)
-    static final int FLOW_COLOR = 0xC8FFFF00;    // RGBA(255, 255, 0, 200)
-}  
+    // Theme constants
+    static final int THEME_DARK = 0;
+    static final int THEME_LIGHT = 1;
+    static final int THEME_MIDNIGHT = 2;
+    static final int THEME_MONOCHROME = 3;
+    static final int THEME_NORDIC = 4;
+    static final int THEME_SOLARIZED = 5;
+    static final int THEME_MINIMAL_GREEN = 6;
+    
+    // Theme names
+    static final String[] THEME_NAMES = {
+        "Dark", "Light", "Midnight","Mono Chrome", "Nordic", "Solarized", "Minimal Green"
+    };
+}
+
+class ColorScheme {
+    int backgroundColor;
+    int gridColor;
+    int nodeColor;
+    int dataNodeColor;
+    int connectionColor;
+    int flowColor;
+    int textColor;
+    int textColorEntity;
+    int highlightColor;
+    int panelBackgroundColor;
+    int accentColor;
+    
+    ColorScheme(int bg, int grid, int node, int dataNode, int conn, 
+               int flow, int text, int textEntity, int highlight, int panel, int accent) {
+        backgroundColor = bg;
+        gridColor = grid;
+        nodeColor = node;
+        dataNodeColor = dataNode;
+        connectionColor = conn;
+        flowColor = flow;
+        textColor = text;
+        textColorEntity = textEntity;
+        highlightColor = highlight;
+        panelBackgroundColor = panel;
+        accentColor = accent;
+    }
+}
