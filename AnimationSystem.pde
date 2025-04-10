@@ -89,17 +89,6 @@ class AnimationSequence {
         else pause();
     }
     
-    void reverse() {
-        isReversed = !isReversed;
-        // Reverse the current step's progress
-        if (currentStep < steps.size()) {
-            AnimationStep currentAnim = steps.get(currentStep);
-            if (!currentAnim.isComplete) {
-                float progress = (millis() - currentAnim.startTime) / (float)currentAnim.duration;
-                currentAnim.startTime = millis() - (long)((1 - progress) * currentAnim.duration);
-            }
-        }
-    }
     
     void setSpeed(float speed) {
         playbackSpeed = speed;
@@ -114,6 +103,46 @@ class AnimationSequence {
         }
     }
     
+    void nextStep() {
+        if (!isPlaying || currentStep >= steps.size() - 1) return;
+        
+        // Complete current step
+        AnimationStep currentAnim = steps.get(currentStep);
+        currentAnim.isComplete = true;
+        currentAnim.finish();
+        
+        // Move to next step
+        currentStep++;
+        if (currentStep < steps.size()) {
+            steps.get(currentStep).start();
+        }
+    }
+    
+    void previousStep() {
+        if (!isPlaying || currentStep <= 0) return;
+        
+        // Complete current step
+        AnimationStep currentAnim = steps.get(currentStep);
+        currentAnim.isComplete = true;
+        currentAnim.finish();
+        
+        // Move to previous step
+        currentStep--;
+        steps.get(currentStep).start();
+    }
+    
+    void reverse() {
+        isReversed = !isReversed;
+        if (currentStep < steps.size() && !isPaused) {
+            AnimationStep currentAnim = steps.get(currentStep);
+            if (!currentAnim.isComplete) {
+                // Reverse the progress
+                float progress = (millis() - currentAnim.startTime) / (float)currentAnim.duration;
+                currentAnim.startTime = millis() - (long)((1 - progress) * currentAnim.duration);
+            }
+        }
+    }
+
     void update() {
         if (!isPlaying || isPaused || currentStep >= steps.size()) return;
         
@@ -121,6 +150,16 @@ class AnimationSequence {
         
         if (!currentAnim.isComplete) {
             currentAnim.execute();
+            
+            float progress = (millis() - currentAnim.startTime) / (float)currentAnim.duration;
+            if (isReversed) {
+                progress = 1 - progress;
+            }
+            
+            if (currentAnim instanceof MoveStep) {
+                MoveStep moveStep = (MoveStep)currentAnim;
+                moveStep.updatePosition(progress);
+            }
         }
         
         if (currentAnim.update()) {
@@ -199,18 +238,18 @@ class MoveStep extends AnimationStep {
         startY = entity.y;
     }
     
-    @Override
-    boolean update() {
-        if (super.update()) return true;
-        
-        float progress = (millis() - startTime) / (float)duration;
-        progress = min(1, progress);
-        
+    void updatePosition(float progress) {
+        progress = min(1, max(0, progress));
         float eased = easeInOutCubic(progress);
         entity.x = lerp(startX, targetX, eased);
         entity.y = lerp(startY, targetY, eased);
-        
-        return false;
+    }
+    
+    @Override
+    boolean update() {
+        if (isComplete) return true;
+        isComplete = (millis() - startTime >= duration);
+        return isComplete;
     }
 }
 

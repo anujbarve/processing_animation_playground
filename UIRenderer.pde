@@ -82,10 +82,6 @@ class UIRenderer {
     void renderThemePanel() {
         ColorScheme theme = app.getThemeManager().getCurrentTheme();
         
-        // Draw theme selector panel
-        fill(theme.panelBackgroundColor);
-        noStroke();
-        rect(PANEL_MARGIN, PANEL_MARGIN, 200, 30);
         
         // Draw theme name
         fill(theme.textColor);
@@ -111,31 +107,65 @@ class UIRenderer {
         }
     }
     
-    void renderAnimationControls() {
+    void renderAnimationPanel() {
         ColorScheme theme = app.getThemeManager().getCurrentTheme();
+
         
-        // Draw animation controls panel
-        fill(theme.panelBackgroundColor);
-        noStroke();
-        rect(PANEL_MARGIN, height - 100, 200, 40);
-        
-        // Draw control buttons
-        textAlign(CENTER, CENTER);
-        textSize(12);
-        
-        // Play/Pause
+        // Draw animation name
         fill(theme.textColor);
-        text("SPACE", PANEL_MARGIN + 30, height - 90);
-        text("Play/Pause", PANEL_MARGIN + 30, height - 75);
+        textAlign(LEFT, CENTER);
+        textSize(14);
+        text("Animation: " + app.getInputHandler().getCurrentAnimationName(),
+             PANEL_MARGIN + 10, PANEL_MARGIN + 55);
+             
+        // Draw animation preview dots
+        int dotSize = 8;
+        int dotSpacing = 15;
+        int dotsStartX = PANEL_MARGIN + 160;
+        int dotsY = PANEL_MARGIN + 55;
         
-        // Reverse
-        text("R", PANEL_MARGIN + 100, height - 90);
-        text("Reverse", PANEL_MARGIN + 100, height - 75);
-        
-        // Speed
-        text("[ ]", PANEL_MARGIN + 170, height - 90);
-        text("Speed", PANEL_MARGIN + 170, height - 75);
+        InputHandler inputHandler = app.getInputHandler();
+        for (int i = 0; i < inputHandler.getAnimationCount(); i++) {
+            if (i == inputHandler.getCurrentAnimationIndex()) {
+                fill(theme.highlightColor);
+            } else {
+                fill(theme.textColor, 100);
+            }
+            ellipse(dotsStartX + i * dotSpacing, dotsY, dotSize, dotSize);
+        }
     }
+    
+    void renderAnimationControls() {
+    ColorScheme theme = app.getThemeManager().getCurrentTheme();
+    
+    // Draw animation controls panel
+    fill(theme.panelBackgroundColor);
+    noStroke();
+    rect(PANEL_MARGIN, height - 100, 300, 40);
+    
+    textAlign(CENTER, CENTER);
+    textSize(12);
+    
+    // Play/Pause
+    fill(theme.textColor);
+    text("SPACE", PANEL_MARGIN + 30, height - 90);
+    text("Play/Pause", PANEL_MARGIN + 30, height - 75);
+    
+    // Step controls
+    text("< ,", PANEL_MARGIN + 90, height - 90);
+    text("Prev Step", PANEL_MARGIN + 90, height - 75);
+    
+    text(". >", PANEL_MARGIN + 150, height - 90);
+    text("Next Step", PANEL_MARGIN + 150, height - 75);
+    
+    // Reverse
+    text("R", PANEL_MARGIN + 210, height - 90);
+    text("Reverse", PANEL_MARGIN + 210, height - 75);
+    
+    // Speed
+    text("[ ]", PANEL_MARGIN + 270, height - 90);
+    text("Speed", PANEL_MARGIN + 270, height - 75);
+}
     
     void renderEntityInfo(Entity selectedEntity) {
         if (selectedEntity == null) return;

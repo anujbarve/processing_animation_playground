@@ -31,6 +31,7 @@ class Application {
     uiRenderer.renderUndoRedoStatus(undoRedoSystem);
     uiRenderer.renderThemePanel();
     uiRenderer.renderAnimationControls();
+    uiRenderer.renderAnimationPanel();
     if (entityManager.getSelectedEntity() != null) {
       uiRenderer.renderEntityInfo(entityManager.getSelectedEntity());
     }
