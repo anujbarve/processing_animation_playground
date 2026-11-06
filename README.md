@@ -112,8 +112,13 @@ A Processing-based interactive visualization system for creating, manipulating, 
 ## Setup and Installation
 
 1. Install Processing 4.0 or later
-2. Clone the repository
-3. Open the main sketch file in Processing
+2. Clone the repository into a folder named `new_playground`, because Processing needs the folder to match the main sketch:
+
+   ```bash
+   git clone https://github.com/anujbarve/processing_animation_playground new_playground
+   ```
+
+3. Open `new_playground/new_playground.pde` in Processing
 4. Run the sketch
 
 ## Dependencies
